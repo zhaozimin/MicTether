@@ -92,8 +92,11 @@ if [ -f "${ICNS_PATH}" ]; then
 fi
 
 # Copy the app to the source folder and rename it to the display name
+# (同名时跳过 rename——mv X X 会报 "Invalid argument")
 cp -R "${ARCHIVE_PATH}/Products/Applications/${APP_NAME}.app" "${DMG_SRC_FOLDER}/"
-mv "${DMG_SRC_FOLDER}/${APP_NAME}.app" "${DMG_SRC_FOLDER}/${DISPLAY_NAME}.app"
+if [ "${APP_NAME}" != "${DISPLAY_NAME}" ]; then
+    mv "${DMG_SRC_FOLDER}/${APP_NAME}.app" "${DMG_SRC_FOLDER}/${DISPLAY_NAME}.app"
+fi
 
 # Create a symlink to Applications directory
 ln -s /Applications "${DMG_SRC_FOLDER}/Applications"
