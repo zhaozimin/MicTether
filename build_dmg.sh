@@ -7,10 +7,11 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_NAME="MicTether"
 SCHEME_NAME="MicTether"
 DISPLAY_NAME="MicTether"
+ARTIFACT_NAME="MicTether-macOS"   # 分发件统一名:网站 latest 下载链恒定指向它,发版无需改名
 BUILD_DIR="${PROJECT_DIR}/build"
 ARCHIVE_PATH="${BUILD_DIR}/${APP_NAME}.xcarchive"
 APP_PATH="${ARCHIVE_PATH}/Products/Applications/${APP_NAME}.app"
-DMG_PATH="${PROJECT_DIR}/${DISPLAY_NAME}.dmg"
+DMG_PATH="${PROJECT_DIR}/${ARTIFACT_NAME}.dmg"
 
 echo "🧹 Cleaning up previous builds..."
 rm -rf "${BUILD_DIR}"
