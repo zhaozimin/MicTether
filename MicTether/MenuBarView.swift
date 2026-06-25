@@ -1,5 +1,5 @@
 /**
- * [INPUT]: 依赖 SwiftUI/AppKit(NSImage 取 App 图标)、NativeSelect 下拉组件、ShadcnSwitch 开关组件；依赖 AutoSwitchViewModel/LaunchAtLoginManager/OnboardingManager/LocalizationManager 四个可观察对象
+ * [INPUT]: 依赖 SwiftUI/AppKit(NSImage 取 App 图标、NSWorkspace 打开外链:主页/仓库)、NativeSelect 下拉组件、ShadcnSwitch 开关组件、GitHubMark octocat 矢量图标；依赖 AutoSwitchViewModel/LaunchAtLoginManager/OnboardingManager/LocalizationManager 四个可观察对象
  * [OUTPUT]: 对外提供 MenuBarView 设置面板(panelWidth)
  * [POS]: components 唯一视图层，被 AppDelegate 经 NSHostingController 承载；文案全部取自注入的 localization
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
@@ -27,6 +27,7 @@ struct MenuBarView: View {
                 onboardingSection
             } else {
                 summarySection
+                adSection
             }
 
             deviceSection(
@@ -287,6 +288,68 @@ struct MenuBarView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+
+    // MARK: - 广告卡（logo 下方一排双卡，半宽紧凑，整卡可点跳转外链）
+
+    private static let homepageURL = URL(string: "https://zhaozimin.com")!
+    private static let githubURL = URL(string: "https://github.com/zhaozimin/MicTether")!
+
+    private var adSection: some View {
+        HStack(spacing: 8) {
+            adCard(title: strings.homepageCardTitle, url: Self.homepageURL) {
+                Image(systemName: "globe")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 20, height: 20)
+            }
+
+            adCard(title: strings.githubCardTitle, url: Self.githubURL) {
+                GitHubMark()
+                    .fill(Color.primary)
+                    .frame(width: 18, height: 18)
+            }
+        }
+    }
+
+    /// 单张紧凑广告卡(一排半宽)：左图标(任意 View) + 短标签 + 右上跳转箭头，整卡 NSWorkspace 打开 url。
+    /// 卡片外壳在此唯一处定义——杜绝多卡重复，新增广告只需多调一次。
+    private func adCard<Icon: View>(
+        title: String,
+        url: URL,
+        @ViewBuilder icon: () -> Icon
+    ) -> some View {
+        Button {
+            NSWorkspace.shared.open(url)
+        } label: {
+            HStack(spacing: 8) {
+                icon()
+
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "arrow.up.forward")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 11)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(nsColor: .controlBackgroundColor).opacity(0.6))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
         )
     }

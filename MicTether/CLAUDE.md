@@ -5,7 +5,9 @@
 
 MicTetherApp.swift: @main 入口。`AppDelegate` 装配状态栏图标(NSStatusItem,船锚矢量模板图标 StatusBarIcon)、无边框浮窗(NSWindow + NSHostingController 承载 SwiftUI)、主菜单(文本编辑快捷键)、首启 onboarding；持有 viewModel/launchAtLoginManager/onboardingManager/localizationManager；Combine 订阅语言变化→重建原生菜单/状态栏/重排浮窗。`OnboardingManager` 用 UserDefaults 记忆是否看过引导。
 
-MenuBarView.swift: SwiftUI 设置面板(宽 348)。摘要区用 App 图标(NSApplicationIcon);4 个设备选择 + 1 个语言选择全部用 NativeSelect 组件(恒 controlWidth=184,等宽右对齐);自动切换/开机自启用自绘 ShadcnSwitch(开绿关灰轨道);引导卡片 + 设备在线状态点 + 退出按钮。文案全部取自注入的 localization,失焦自动隐藏。
+MenuBarView.swift: SwiftUI 设置面板(宽 348)。摘要区用 App 图标(NSApplicationIcon);logo 下方一排半宽双广告卡(`adCard` 参数化构造器统一卡片外壳,紧凑单行=图标+短标签+跳转箭头——左主页 globe→zhaozimin.com + 右 GitHub octocat→zhaozimin/MicTether 仓库,整卡可点 NSWorkspace 打开外链);4 个设备选择 + 1 个语言选择全部用 NativeSelect 组件(恒 controlWidth=184,等宽右对齐);自动切换/开机自启用自绘 ShadcnSwitch(开绿关灰轨道);引导卡片 + 设备在线状态点 + 退出按钮。文案全部取自注入的 localization,失焦自动隐藏。
+
+GitHubMark.swift: GitHub 官方 Octocat 矢量剪影 `GitHubMark: Shape`(SF Symbols 无此 logo),内含迷你 SVG 路径解析器(M/L/H/V/C/S/A/Z 绝对+相对、椭圆弧→cubic 贝塞尔),等比居中缩放;被 MenuBarView logo 下方 GitHub 广告卡 fill 消费。
 
 NativeSelect.swift: shadcn NativeSelect 风格定宽下拉组件 `NativeSelect<Value>`。闭合态纯 SwiftUI 自绘(描边盒+rounded-md+单下箭头+占位 muted,渲染可控)、展开态点击弹原生 NSMenu(透明 NSView 覆盖层捕获点击,带勾选);弃用渲染不可控的 SwiftUI Menu。
 

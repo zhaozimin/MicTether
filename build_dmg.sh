@@ -39,6 +39,43 @@ if [ ! -d "${APP_PATH}" ]; then
     exit 1
 fi
 
+# ============================================================================
+# Developer ID 签名（公开分发）：硬化运行时 + 安全时间戳 + 沙盒 entitlements。
+# 自动选取钥匙串中的 "Developer ID Application" 身份；缺失则降级 ad-hoc（仅本机自用）。
+# 注：公证(notarization)需 Apple 凭据，本脚本不做——公开分发前请自行 `xcrun notarytool submit`。
+# 可用 MICTETHER_SIGN_ID 环境变量覆盖签名身份。
+# ============================================================================
+# 沙盒真相源是 project.yml 的 ENABLE_APP_SANDBOX=YES；未签名归档不带 entitlements，
+# 故在此合成签名 entitlements(仅沙盒一项,与构建设置一致),构建产物不入库,不触碰源 entitlements 文件。
+SIGN_ENTITLEMENTS="${BUILD_DIR}/sign.entitlements"
+cat > "${SIGN_ENTITLEMENTS}" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+</dict>
+</plist>
+EOF
+
+SIGN_ID="${MICTETHER_SIGN_ID:-$(security find-identity -v -p codesigning | grep 'Developer ID Application' | head -1 | sed -E 's/^[^"]*"([^"]*)".*$/\1/')}"
+
+if [ -n "${SIGN_ID}" ]; then
+    echo "🔏 Developer ID 签名: ${SIGN_ID}"
+    codesign --force --options runtime --timestamp \
+        --entitlements "${SIGN_ENTITLEMENTS}" \
+        --sign "${SIGN_ID}" "${APP_PATH}"
+else
+    echo "⚠️  未找到 Developer ID Application 证书，回退 ad-hoc 签名（仅本机自用，公开分发会被 Gatekeeper 拦截）"
+    codesign --force --options runtime \
+        --entitlements "${SIGN_ENTITLEMENTS}" \
+        --sign - "${APP_PATH}"
+fi
+
+echo "🔎 验证签名..."
+codesign --verify --strict --verbose=2 "${APP_PATH}"
+
 echo "📦 Creating DMG directory structure in /tmp..."
 TMP_WORKSPACE="/tmp/MicTether_$$"
 DMG_SRC_FOLDER="${TMP_WORKSPACE}/dmg_src"
@@ -81,6 +118,13 @@ if args.count == 3 {
 }
 EOF
     swift "$SWIFT_SCRIPT" "${ICNS_PATH}" "${DMG_PATH}" || true
+fi
+
+# DMG 容器本身也签名（持有 Developer ID 时），让分发件整体可校验
+if [ -n "${SIGN_ID}" ] && [ -f "${DMG_PATH}" ]; then
+    echo "🔏 为 DMG 容器签名..."
+    codesign --force --timestamp --sign "${SIGN_ID}" "${DMG_PATH}"
+    codesign --verify --strict --verbose=2 "${DMG_PATH}"
 fi
 
 # Cleanup temp

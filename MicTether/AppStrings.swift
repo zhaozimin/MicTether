@@ -421,4 +421,20 @@ struct AppStrings {
         case .simplifiedChinese: return "首次引导"
         }
     }
+
+    // MARK: 广告卡文案（logo 下方一排双卡：作者主页 + GitHub，紧凑单标签）
+
+    var homepageCardTitle: String {
+        switch language {
+        case .english: return "Homepage"
+        case .simplifiedChinese: return "作者主页"
+        }
+    }
+
+    var githubCardTitle: String {
+        switch language {
+        case .english: return "GitHub"
+        case .simplifiedChinese: return "GitHub"
+        }
+    }
 }
