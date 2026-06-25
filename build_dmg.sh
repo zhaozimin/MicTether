@@ -130,6 +130,23 @@ if [ -n "${SIGN_ID}" ] && [ -f "${DMG_PATH}" ]; then
     codesign --verify --strict --verbose=2 "${DMG_PATH}"
 fi
 
+# ============================================================================
+# 公证 + 装订（可选）：检测到 notarytool 凭据 profile 时,提交 Apple 公证并把票据
+# 装订进 DMG——之后 Gatekeeper 直接放行,无需右键/xattr。缺凭据则跳过(仍是已签名未公证包)。
+# profile 名可用 MICTETHER_NOTARY_PROFILE 覆盖,默认 MicTether-notary。
+# 一次性配置: xcrun notarytool store-credentials <profile> --apple-id .. --team-id .. --password ..
+# ============================================================================
+NOTARY_PROFILE="${MICTETHER_NOTARY_PROFILE:-MicTether-notary}"
+if [ -n "${SIGN_ID}" ] && xcrun notarytool history --keychain-profile "${NOTARY_PROFILE}" >/dev/null 2>&1; then
+    echo "📜 提交公证（profile: ${NOTARY_PROFILE}，可能需几分钟）..."
+    xcrun notarytool submit "${DMG_PATH}" --keychain-profile "${NOTARY_PROFILE}" --wait
+    echo "📌 装订公证票据到 DMG..."
+    xcrun stapler staple "${DMG_PATH}"
+    xcrun stapler validate "${DMG_PATH}"
+else
+    echo "ℹ️  跳过公证（未检测到 notarytool 凭据 profile '${NOTARY_PROFILE}'）；分发件已签名但未公证。"
+fi
+
 # Cleanup temp
 rm -rf "${TMP_WORKSPACE}"
 
