@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" alt="MicTether 应用图标 — 麦克风与船锚的合体" width="160" height="160" />
+
 # MicTether · 声锚
 
 **把 macOS 的默认麦克风 / 扬声器牢牢钉在你选定的设备上。**

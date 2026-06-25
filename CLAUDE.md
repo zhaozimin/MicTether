@@ -2,7 +2,8 @@
 Swift + SwiftUI + AppKit + CoreAudio(HAL) + ServiceManagement · macOS 13.0+ · XcodeGen
 
 <directory>
-MicTether/ - 应用源码 (1 个 target, 11 个 Swift 文件 + 配置 + 图标资源)
+MicTether/ - 应用源码 (1 个 target, 12 个 Swift 文件 + 配置 + 图标资源)
+assets/ - 文档图文资源；logo.png 为 AppIcon.icns 提取并加圆角的应用图标，供 README 头部展示
 </directory>
 
 <config>
